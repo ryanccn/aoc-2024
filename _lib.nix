@@ -6,7 +6,11 @@ let
     add
     elemAt
     genList
+    isList
+    isString
     length
+    match
+    stringLength
     ;
 in
 nixpkgs-lib.fix (
@@ -16,7 +20,19 @@ nixpkgs-lib.fix (
       eq = a: b: a == b;
 
       sum = lib.foldr add 0;
-      indices = l: lib.range 0 ((length l) - 1);
+      indices =
+        l:
+        let
+          lengthFn =
+            if isList l then
+              length
+            else if isString l then
+              stringLength
+            else
+              throw "${toString l} is neither a list nor a string";
+        in
+        lib.range 0 ((lengthFn l) - 1);
+      isDigit = c: (match "[[:digit:]]" c) == [ ];
 
       removeIndex =
         lst: idx:

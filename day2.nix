@@ -26,6 +26,7 @@ in
   part1 = lib.count isSafe data;
 
   part2 = lib.count (
-    rpt': any isSafe ((lib.singleton rpt') ++ (map (lib.aoc.removeIndex rpt') (lib.aoc.indices rpt')))
+    rpt':
+    any isSafe (lib.concat (lib.singleton rpt') (map (lib.aoc.removeIndex rpt') (lib.aoc.indices rpt')))
   ) data;
 }
