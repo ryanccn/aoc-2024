@@ -1,5 +1,7 @@
 { input, lib }:
 let
+  inherit (builtins) fromJSON substring stringLength;
+
   processChar =
     readToggles:
     lib.fix (
@@ -7,83 +9,78 @@ let
       (
         state:
         let
-          char = builtins.substring state.idx 1 input;
+          char = substring state.idx 1 input;
         in
-        if state.idx >= (builtins.stringLength input) then
-          state.history # we're done here
+        if state.idx >= (stringLength input) then
+          state.result # we're done here
         else if state.type == "idle" then
-          if builtins.substring state.idx 4 input == "mul(" then
+          if substring state.idx 4 input == "mul(" then
             (self {
-              inherit (state) history;
+              inherit (state) result;
               type = "fst";
               collected = "";
               idx = state.idx + 4;
             })
-          else if readToggles && builtins.substring state.idx 7 input == "don't()" then
+          else if readToggles && substring state.idx 7 input == "don't()" then
             (self {
-              inherit (state) history;
+              inherit (state) result;
               type = "off";
               idx = state.idx + 7;
             })
           else
             (self {
-              inherit (state) type history;
+              inherit (state) type result;
               idx = state.idx + 1;
             })
         else if readToggles && state.type == "off" then
-          if builtins.substring state.idx 4 input == "do()" then
+          if substring state.idx 4 input == "do()" then
             (self {
-              inherit (state) history;
+              inherit (state) result;
               type = "idle";
               idx = state.idx + 4;
             })
           else
             (self {
-              inherit (state) type history;
+              inherit (state) type result;
               idx = state.idx + 1;
             })
         else if state.type == "fst" then
           if lib.aoc.isDigit char then
             (self {
-              inherit (state) type history;
+              inherit (state) type result;
               collected = state.collected + char;
               idx = state.idx + 1;
             })
           else if char == "," then
             (self {
-              inherit (state) history;
+              inherit (state) result;
               type = "snd";
-              fst = lib.toInt state.collected;
+              fst = fromJSON state.collected;
               collected = "";
               idx = state.idx + 1;
             })
           else
             (self {
-              inherit (state) history;
+              inherit (state) result;
               type = "idle";
               idx = state.idx + 1;
             })
         else if state.type == "snd" then
           if lib.aoc.isDigit char then
             (self {
-              inherit (state) type fst history;
+              inherit (state) type fst result;
               collected = state.collected + char;
               idx = state.idx + 1;
             })
           else if char == ")" then
             (self {
               type = "idle";
-              history = state.history ++ [
-                {
-                  inherit (state) fst;
-                  snd = lib.toInt state.collected;
-                }
-              ];
+              result = state.result + (state.fst * (fromJSON state.collected));
               idx = state.idx + 1;
             })
           else
             (self {
-              inherit (state) history;
+              inherit (state) result;
               type = "idle";
               idx = state.idx + 1;
             })
@@ -95,10 +92,10 @@ let
   initialState = {
     idx = 0;
     type = "idle";
-    history = [ ];
+    result = 0;
   };
 in
 {
-  part1 = lib.aoc.sum (map ({ fst, snd }: fst * snd) (processChar false initialState));
-  part2 = lib.aoc.sum (map ({ fst, snd }: fst * snd) (processChar true initialState));
+  part1 = processChar false initialState;
+  part2 = processChar true initialState;
 }

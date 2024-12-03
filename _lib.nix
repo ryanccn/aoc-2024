@@ -9,7 +9,6 @@ let
     isList
     isString
     length
-    match
     stringLength
     ;
 in
@@ -32,7 +31,19 @@ nixpkgs-lib.fix (
               throw "${toString l} is neither a list nor a string";
         in
         lib.range 0 ((lengthFn l) - 1);
-      isDigit = c: (match "[[:digit:]]" c) == [ ];
+
+      isDigit =
+        c:
+        c == "0"
+        || c == "1"
+        || c == "2"
+        || c == "3"
+        || c == "4"
+        || c == "5"
+        || c == "6"
+        || c == "7"
+        || c == "8"
+        || c == "9";
 
       removeIndex =
         lst: idx:
