@@ -1,6 +1,6 @@
 { input, lib }:
 let
-  inherit (builtins) fromJSON substring stringLength;
+  inherit (builtins) substring stringLength;
 
   processChar =
     readToggles:
@@ -18,7 +18,7 @@ let
             (self {
               inherit (state) result;
               type = "fst";
-              collected = "";
+              fst = 0;
               idx = state.idx + 4;
             })
           else if readToggles && substring state.idx 7 input == "don't()" then
@@ -45,18 +45,20 @@ let
               idx = state.idx + 1;
             })
         else if state.type == "fst" then
-          if lib.aoc.isDigit char then
+          let
+            digit = lib.aoc.safeDigitToInt char;
+          in
+          if digit != null then
             (self {
               inherit (state) type result;
-              collected = state.collected + char;
+              fst = state.fst * 10 + digit;
               idx = state.idx + 1;
             })
           else if char == "," then
             (self {
-              inherit (state) result;
+              inherit (state) result fst;
               type = "snd";
-              fst = fromJSON state.collected;
-              collected = "";
+              snd = 0;
               idx = state.idx + 1;
             })
           else
@@ -66,16 +68,19 @@ let
               idx = state.idx + 1;
             })
         else if state.type == "snd" then
-          if lib.aoc.isDigit char then
+          let
+            digit = lib.aoc.safeDigitToInt char;
+          in
+          if digit != null then
             (self {
               inherit (state) type fst result;
-              collected = state.collected + char;
+              snd = state.snd * 10 + digit;
               idx = state.idx + 1;
             })
           else if char == ")" then
             (self {
               type = "idle";
-              result = state.result + (state.fst * (fromJSON state.collected));
+              result = state.result + state.fst * state.snd;
               idx = state.idx + 1;
             })
           else

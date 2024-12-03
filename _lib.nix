@@ -32,18 +32,30 @@ nixpkgs-lib.fix (
         in
         lib.range 0 ((lengthFn l) - 1);
 
-      isDigit =
+      safeDigitToInt =
         c:
-        c == "0"
-        || c == "1"
-        || c == "2"
-        || c == "3"
-        || c == "4"
-        || c == "5"
-        || c == "6"
-        || c == "7"
-        || c == "8"
-        || c == "9";
+        if c == "0" then
+          0
+        else if c == "1" then
+          1
+        else if c == "2" then
+          2
+        else if c == "3" then
+          3
+        else if c == "4" then
+          4
+        else if c == "5" then
+          5
+        else if c == "6" then
+          6
+        else if c == "7" then
+          7
+        else if c == "8" then
+          8
+        else if c == "9" then
+          9
+        else
+          null;
 
       removeIndex =
         lst: idx:
