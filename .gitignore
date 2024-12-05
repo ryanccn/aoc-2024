@@ -1,3 +1,5 @@
 .DS_Store
+
 result*
 inputs/
+stats.json
