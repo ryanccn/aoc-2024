@@ -1,6 +1,9 @@
 { input, lib }:
 let
-  inherit (builtins) elemAt length;
+  inherit (builtins)
+    elemAt
+    length
+    ;
 
   xy = x: {
     inherit x;

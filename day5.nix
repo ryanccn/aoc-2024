@@ -41,16 +41,5 @@ let
 in
 {
   part1 = lib.aoc.sum (map center outcomes.right);
-
-  part2 = lib.aoc.sum (
-    map center (
-      map (sort (
-        a: b:
-        (elem [
-          a
-          b
-        ] rules)
-      )) outcomes.wrong
-    )
-  );
+  part2 = lib.aoc.sum (map center (map (sort (a: b: elem [ a b ] rules)) outcomes.wrong));
 }

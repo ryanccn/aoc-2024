@@ -5,6 +5,7 @@ let
   inherit (builtins)
     add
     elemAt
+    foldl'
     genList
     isList
     isString
@@ -18,7 +19,7 @@ nixpkgs-lib.fix (
       abs = a: if a > 0 then a else (-a);
       eq = a: b: a == b;
 
-      sum = lib.foldr add 0;
+      sum = foldl' add 0;
       indices =
         l:
         let

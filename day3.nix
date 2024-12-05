@@ -22,7 +22,7 @@ let
       in
       if isInt state then
         state
-      else if state.idx >= (stringLength input) then
+      else if state.idx >= stringLength input then
         state.result
       else if state.type == "idle" then
         if substring state.idx 4 input == "mul(" then
@@ -101,7 +101,7 @@ let
             idx = state.idx + 1;
           }
       else
-        throw "unknown state: ${toString state}"
+        throw "unknown state: ${state.type}"
     ) initialState (lib.replicate (stringLength input) null);
 in
 {
