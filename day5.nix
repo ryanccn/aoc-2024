@@ -8,38 +8,45 @@ let
     partition
     elem
     foldl'
+    mapAttrs
+    groupBy
     ;
 
-  center = l: elemAt l (((length l) - 1) / 2);
+  center = l: lib.toInt (elemAt l (((length l) - 1) / 2));
 
   sections = lib.splitString "\n\n" (lib.trim input);
-  rules = map (l: map lib.toInt (lib.splitString "|" l)) (lib.aoc.lines (elemAt sections 0));
-  updates = map (l: map lib.toInt (lib.splitString "," l)) (lib.aoc.lines (elemAt sections 1));
 
-  findFirstIndexes =
-    val1: val2:
-    foldl'
-      (state: el: {
-        fst = if state.fst < 0 then if el == val1 then -state.fst - 1 else state.fst - 1 else state.fst;
-        snd = if state.snd < 0 then if el == val2 then -state.snd - 1 else state.snd - 1 else state.snd;
-      })
-      {
-        fst = -1;
-        snd = -1;
-      };
+  rules = mapAttrs (_: foldl' (acc: v: acc ++ [ (elemAt v 1) ]) [ ]) (
+    groupBy (v: elemAt v 0) (map (lib.splitString "|") (lib.aoc.lines (elemAt sections 0)))
+  );
+
+  updates = map (lib.splitString ",") (lib.aoc.lines (elemAt sections 1));
+
+  constructIndices =
+    l: foldl' (acc: { i, v }: acc // { ${v} = i; }) { } (lib.imap0 (i: v: { inherit i v; }) l);
 
   outcomes = partition (
     update:
+    let
+      updateIndices = constructIndices update;
+    in
     all (
-      rule:
+      { name, value }:
       let
-        idxs = findFirstIndexes (elemAt rule 0) (elemAt rule 1) update;
+        fst = updateIndices.${name} or null;
       in
-      idxs.fst < 0 || idxs.snd < 0 || idxs.fst < idxs.snd
-    ) rules
+      fst == null
+      || all (
+        value':
+        let
+          snd = updateIndices.${value'} or null;
+        in
+        snd == null || fst < snd
+      ) value
+    ) (lib.attrsToList rules)
   ) updates;
 in
-{
+lib.traceSeq rules {
   part1 = lib.aoc.sum (map center outcomes.right);
-  part2 = lib.aoc.sum (map center (map (sort (a: b: elem [ a b ] rules)) outcomes.wrong));
+  part2 = lib.aoc.sum (map center (map (sort (a: b: elem b rules.${a} or [ ])) outcomes.wrong));
 }
