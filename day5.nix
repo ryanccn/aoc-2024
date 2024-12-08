@@ -46,7 +46,7 @@ let
     ) (lib.attrsToList rules)
   ) updates;
 in
-lib.traceSeq rules {
+{
   part1 = lib.aoc.sum (map center outcomes.right);
   part2 = lib.aoc.sum (map center (map (sort (a: b: elem b rules.${a} or [ ])) outcomes.wrong));
 }
